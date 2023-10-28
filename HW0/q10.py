@@ -4,11 +4,6 @@ import matplotlib.pyplot as plt
 n = 40000
 Z = np.random.randn(n)
 
-ax = plt.gca()
-ax.set_xlim((-3, 3))
-plt.xlabel("Observations")
-plt.ylabel("Probability")
-
 plt.step(sorted(Z), np.arange(1, n + 1) / float(n), label="Gaussian")
 
 # ============================ Question 10.b ============================
@@ -17,5 +12,8 @@ for k in [1, 8, 64, 512]:
     plt.step(sorted(Zk), np.arange(1, n + 1) / float(n), label=f"k = {k}")
 # =======================================================================
 
+plt.xlim(-3,3)
+plt.xlabel("Observations")
+plt.ylabel("Probability")
 plt.legend()
 plt.show()
