@@ -67,16 +67,6 @@ class PolynomialRegression:
         poly_with_X0 = np.column_stack((col_ones, poly)) 
         print(poly_with_X0)
 
-
-
-
-        
-
-
-
-
-
-
     @problem.tag("hw1-A")
     def predict(self, X: np.ndarray) -> np.ndarray:
         """
@@ -102,7 +92,7 @@ def mean_squared_error(a: np.ndarray, b: np.ndarray) -> float:
     Returns:
         float: mean squared error between a and b.
     """
-    raise NotImplementedError("Your Code Goes Here")
+    return np.mean((np.array(a) - np.array(b))**2)
 
 
 @problem.tag("hw1-A", start_line=5)
