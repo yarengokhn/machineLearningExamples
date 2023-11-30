@@ -17,4 +17,4 @@ result=np.matmul(Ainv, b)
 #Question 9.b.2
 c =np.matrix([1,1,1]).transpose()
 result=np.matmul(A, c)
-# print(result)
+print(result)
