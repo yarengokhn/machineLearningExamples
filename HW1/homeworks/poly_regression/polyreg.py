@@ -53,19 +53,24 @@ class PolynomialRegression:
         Note:
             You will need to apply polynomial expansion and data standardization first.
         """
-        np.set_printoptions(suppress=True, precision=2)
         #polynomial expansion 
         poly = self.polyfeatures(X,self.degree)
 
         #Data standardization 
-        means = np.mean(poly, axis=0)
-        stds = np.std(poly, axis=0)
-        poly = (poly - means) / stds
+        mean = poly.mean(0)
+        std = poly.std(0)
+        poly = (poly - mean) / std
 
         #column of 1s
-        col_ones=np.ones((len(X),1))#1 means the number of column 
+        col_ones = np.ones((len(X), 1)) # 1 means the number of column 
         poly_with_X0 = np.column_stack((col_ones, poly)) 
-        print(poly_with_X0)
+        
+        # construct reg matrix
+        regMatrix = self.reg_lambda * np.eye(self.degree + 1)
+        regMatrix[0, 0] = 0
+
+        # analytical solution (X'X + regMatrix)^-1 X' y
+        self.weight = np.linalg.solve(poly_with_X0.T @ poly_with_X0 + regMatrix, poly_with_X0.T @ y)
 
     @problem.tag("hw1-A")
     def predict(self, X: np.ndarray) -> np.ndarray:
@@ -78,7 +83,21 @@ class PolynomialRegression:
         Returns:
             np.ndarray: Array of shape (n, 1) with predictions.
         """
-        raise NotImplementedError("Your Code Goes Here")
+        n= len(X)
+        # expand X to be a n*d array with degree d
+        new_feat = self.polyfeatures(X, self.degree)
+
+        # compute the statistics for train and test data
+        mean = new_feat.mean(0)
+        std = new_feat.std(0)
+        new_feat = (new_feat - mean) / std
+
+        # add the feature row with order 0
+        col_ones = np.ones((len(X), 1)) 
+        poly_with_X0 = np.column_stack((col_ones, new_feat)) 
+
+        # predict
+        return poly_with_X0.dot(self.weight)
 
 
 @problem.tag("hw1-A")
