@@ -59,7 +59,8 @@ class PolynomialRegression:
         #Data standardization 
         mean = poly.mean(0)
         std = poly.std(0)
-        poly = (poly - mean) / std
+        poly = (poly - mean)/std
+        
 
         #column of 1s
         col_ones = np.ones((len(X), 1)) # 1 means the number of column 
@@ -86,11 +87,14 @@ class PolynomialRegression:
         n= len(X)
         # expand X to be a n*d array with degree d
         new_feat = self.polyfeatures(X, self.degree)
+      
 
         # compute the statistics for train and test data
         mean = new_feat.mean(0)
         std = new_feat.std(0)
+   
         new_feat = (new_feat - mean) / std
+       
 
         # add the feature row with order 0
         col_ones = np.ones((len(X), 1)) 
@@ -111,6 +115,7 @@ def mean_squared_error(a: np.ndarray, b: np.ndarray) -> float:
     Returns:
         float: mean squared error between a and b.
     """
+
     return np.mean((np.array(a) - np.array(b))**2)
 
 
@@ -147,5 +152,18 @@ def learningCurve(
 
     errorTrain = np.zeros(n)
     errorTest = np.zeros(n)
-    # Fill in errorTrain and errorTest arrays
-    raise NotImplementedError("Your Code Goes Here")
+
+
+    # Fill in errorTrain and errorTest arrays^
+    for i in range (1,n):
+        polyReg = PolynomialRegression(degree=degree,reg_lambda=reg_lambda)
+        polyReg.fit(Xtrain[0:i+1],Ytrain[0:i+1])
+        errorTrain[i]= mean_squared_error(polyReg.predict(Xtrain[0:(i+1)]), Ytrain[0:(i+1)])
+        errorTest[i]= mean_squared_error(polyReg.predict(Xtest[0:(i+1)]), Ytest[0:(i+1)])
+    # if np.isnan(errorTrain[i]) or np.isinf(errorTrain[i]):
+    #     print(f'NaN or Inf encountered in errorTrain at index {i}')
+    # if np.isnan(errorTest[i]) or np.isinf(errorTest[i]):
+    #     print(f'NaN or Inf encountered in errorTest at index {i}')
+    return (errorTrain, errorTest)
+
+
