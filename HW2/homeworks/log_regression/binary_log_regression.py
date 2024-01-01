@@ -67,9 +67,8 @@ class BinaryLogReg:
         n = X.shape[0]
         arr = np.zeros((n, ))
         for i in range(n):
-            first_part= np.dot(X[i],self.weight)+self.bias
-            arr[i]=1 / (1 + np.exp(-y[i] * first_part))
-        print(arr)
+            first_part = np.dot(X[i], self.weight) + self.bias
+            arr[i] = 1 / (1 + np.exp(-y[i] * first_part))
         return arr
            
 
@@ -87,13 +86,11 @@ class BinaryLogReg:
         Returns:
             float: Loss given X, y, self.weight, self.bias and self._lambda
         """
-        loss_first_part = np.sum(np.log(1 + np.exp(-y * (self.bias + np.dot(X, self.weight)))))
-
-        loss_regul_part = self._lambda * np.linalg.norm(self.weight) ** 2
         n = X.shape[0]
+        loss_first_part = np.sum(np.log(1 + np.exp(-y * (self.bias + np.dot(X, self.weight)))))
+        loss_regul_part = self._lambda * np.linalg.norm(self.weight) ** 2
+        return (1 / n) * loss_first_part + loss_regul_part
 
-        loss_function = (1 / n) * loss_first_part + loss_regul_part
-        return loss_function
 
     @problem.tag("hw2-A")
     def gradient_J_weight(self, X: np.ndarray, y: np.ndarray) -> np.ndarray:
@@ -108,21 +105,13 @@ class BinaryLogReg:
         Returns:
             np.ndarray: An `(d, )` vector which represents gradient of loss J with respect to self.weight.
         """
-
         n = X.shape[0]
-        gradient_w = np.zeros_like(self.weight)
+        sum_part = np.zeros_like(self.weight)
         mu = self.mu(X, y)
         
-        
         for i in range(n):
-            # exp_val = np.exp(-y[i] * (self.bias + np.dot(X[i], self.weight)))
-            grad_component = y[i] * X[i] *(mu[i]-1)
-            gradient_w += grad_component
-        
-        
-        grad_component= grad_component / n
-        gradient_w += 2 * self._lambda * self.weight
-        return  gradient_w
+            sum_part += X[i] * y[i] * (mu[i] - 1)        
+        return  (sum_part / n) + 2 * self._lambda * self.weight
     
 
     @problem.tag("hw2-A")
@@ -139,7 +128,14 @@ class BinaryLogReg:
         Returns:
             float: A number that represents gradient of loss J with respect to self.bias.
         """
-        raise NotImplementedError("Your Code Goes Here")
+        n = X.shape[0]
+        sum_part = np.zeros_like(self.weight)
+        mu = self.mu(X, y)
+        
+        for i in range(n):
+            sum_part += y[i] * (mu[i] - 1)        
+        return  (sum_part / n)
+    
 
     @problem.tag("hw2-A")
     def predict(self, X: np.ndarray) -> np.ndarray:
@@ -153,7 +149,15 @@ class BinaryLogReg:
         Returns:
             np.ndarray: An `(n, )` array of either -1s or 1s representing guess for each observation.
         """
-        raise NotImplementedError("Your Code Goes Here")
+
+        reg = np.zeros(X.shape[0])
+        reshaped_weights = self.weight.reshape((784, 1))
+
+        reg = np.dot(X , reshaped_weights)  + self.bias
+        reg = 1 / (1 + np.exp(-reg)) # sigmoid function
+        reg = np.where(reg >= 0.5 , 1, -1) # decision with 0.5 threshold
+        return reg.reshape((30,))
+
 
     @problem.tag("hw2-A")
     def misclassification_error(self, X: np.ndarray, y: np.ndarray) -> float:
@@ -170,7 +174,12 @@ class BinaryLogReg:
         Returns:
             float: percentage of times prediction did not match target, given an observation (i.e. misclassification error).
         """
-        raise NotImplementedError("Your Code Goes Here")
+        predictions = self.predict(X)
+        correct_predictions = np.sum(predictions == y)
+        total_samples = y.shape[0]
+        accuracy = correct_predictions / total_samples
+        return 1 - accuracy
+
 
     @problem.tag("hw2-A")
     def step(self, X: np.ndarray, y: np.ndarray, learning_rate: float = 1e-4):
@@ -186,7 +195,8 @@ class BinaryLogReg:
             learning_rate (float, optional): Learning rate of SGD/GD algorithm.
                 Defaults to 1e-4.
         """
-        raise NotImplementedError("Your Code Goes Here")
+        self.weight -= self.gradient_J_weight(X, y) * learning_rate
+        self.bias -= self.gradient_J_bias(X, y) * learning_rate
 
     @problem.tag("hw2-A", start_line=7)
     def train(
