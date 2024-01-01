@@ -87,11 +87,13 @@ class BinaryLogReg:
             float: Loss given X, y, self.weight, self.bias and self._lambda
         """
         n = X.shape[0]
-  
-        z = self.bias + np.dot(X, self.weight)
-        loss_first_part = np.sum(np.log(1 + np.exp(-y * z)))
+        d = X.shape[1]
+
+        reshaped_weights = self.weight.reshape(d, 1) # (d, ) -> (d, 1)
+        z =  X @ reshaped_weights + self.bias
+        loss_first_part = np.log(1 / self.mu(X, y)).mean()
         loss_regul_part = self._lambda * np.linalg.norm(self.weight) ** 2
-        return (1 / n) * loss_first_part + loss_regul_part
+        return loss_first_part + loss_regul_part
 
 
     @problem.tag("hw2-A")
@@ -131,7 +133,7 @@ class BinaryLogReg:
             float: A number that represents gradient of loss J with respect to self.bias.
         """
         n = X.shape[0]
-        sum_part = np.zeros_like(self.weight)
+        sum_part = 0
         mu = self.mu(X, y)
         
         for i in range(n):
@@ -178,11 +180,10 @@ class BinaryLogReg:
         Returns:
             float: percentage of times prediction did not match target, given an observation (i.e. misclassification error).
         """
+        n = X.shape[0]
         predictions = self.predict(X)
-        correct_predictions = np.sum(predictions == y)
-        total_samples = y.shape[0]
-        accuracy = correct_predictions / total_samples
-        return 1 - accuracy
+        incorrect_predictions = np.sum(predictions != y)
+        return incorrect_predictions / n
 
 
     @problem.tag("hw2-A")
@@ -259,11 +260,12 @@ class BinaryLogReg:
             "test_errors": [],
         }
 
-        i, d = X_train.shape
+        d = X_train.shape[1]
         self.weight = np.zeros((d,))
         self.bias = 0.0
 
         for epoch in range(epochs):
+            print("epoch:", epoch)
             permutation = RNG.permutation(len(X_train))
             X_train_shuffled = X_train[permutation]
             y_train_shuffled = y_train[permutation]
@@ -272,32 +274,11 @@ class BinaryLogReg:
                 end_idx = (batch + 1) * batch_size
                 X_batch = X_train_shuffled[start_idx:end_idx]
                 y_batch = y_train_shuffled[start_idx:end_idx]
-
                 self.step(X_batch, y_batch, learning_rate)
-
-                result["train_losses"].append(self.loss(X_train, y_train))
-                result["train_errors"].append(self.misclassification_error(X_train, y_train))
-                result["test_losses"].append(self.loss(X_test, y_test))
-                result["test_errors"].append(self.misclassification_error(X_test, y_test))
-           
-        # i, d = X_train.shape
-        # self.weight = np.zeros((d,))
-        # self.bias = 0
-
-        # for epoch in range(epochs):
-        #     for j in range(num_batches):
-        #         first = j * batch_size
-        #         last = first + batch_size
-        #         self.step(X_train[first:last], y_train[first:last], learning_rate)
-
-        #     result["train_losses"].append(self.loss(X_train, y_train))
-        #     result["train_errors"].append(self.misclassification_error(X_train, y_train))
-        #     result["test_losses"].append(self.loss(X_test, y_test))
-        #     result["test_errors"].append(self.misclassification_error(X_test, y_test))
-
-        #     print(
-        #         f'Finished iteration {epoch}, Train Loss : {result["train_losses"][-1]}, Test Loss : {result["test_losses"][-1]}')
-
+            result["train_losses"].append(self.loss(X_train, y_train))
+            result["train_errors"].append(self.misclassification_error(X_train, y_train))
+            result["test_losses"].append(self.loss(X_test, y_test))
+            result["test_errors"].append(self.misclassification_error(X_test, y_test))
         return result
     
 
