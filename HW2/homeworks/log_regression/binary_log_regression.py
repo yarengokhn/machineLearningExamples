@@ -254,8 +254,27 @@ class BinaryLogReg:
             "test_losses": [],
             "test_errors": [],
         }
-        raise NotImplementedError("Your Code Goes Here")
 
+        i, d = X_train.shape
+        self.weight = np.zeros((d,))
+        self.bias = 0.
+
+        for epoch in range(epochs):
+            for j in range(num_batches):
+                first = j * batch_size
+                last = first + batch_size
+                self.step(X_train[first:last], y_train[first:last], learning_rate)
+
+            result["train_losses"].append(self.loss(X_train, y_train))
+            result["train_errors"].append(self.misclassification_error(X_train, y_train))
+            result["test_losses"].append(self.loss(X_test, y_test))
+            result["test_errors"].append(self.misclassification_error(X_test, y_test))
+
+            print(
+                f'Finished iteration {epoch}, Train Loss : {result["train_losses"][-1]}, Test Loss : {result["test_losses"][-1]}')
+
+        return result
+    
 
 if __name__ == "__main__":
     model = BinaryLogReg()
