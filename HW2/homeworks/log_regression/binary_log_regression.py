@@ -70,7 +70,7 @@ class BinaryLogReg:
             first_part= np.dot(X[i],self.weight)+self.bias
             arr[i]=1 / (1 + np.exp(-y[i] * first_part))
         print(arr)
-        return arr    
+        return arr
            
 
     @problem.tag("hw2-A")
@@ -108,7 +108,22 @@ class BinaryLogReg:
         Returns:
             np.ndarray: An `(d, )` vector which represents gradient of loss J with respect to self.weight.
         """
-        raise NotImplementedError("Your Code Goes Here")
+
+        n = X.shape[0]
+        gradient_w = np.zeros_like(self.weight)
+        mu = self.mu(X, y)
+        
+        
+        for i in range(n):
+            # exp_val = np.exp(-y[i] * (self.bias + np.dot(X[i], self.weight)))
+            grad_component = y[i] * X[i] *(mu[i]-1)
+            gradient_w += grad_component
+        
+        
+        grad_component= grad_component / n
+        gradient_w += 2 * self._lambda * self.weight
+        return  gradient_w
+    
 
     @problem.tag("hw2-A")
     def gradient_J_bias(self, X: np.ndarray, y: np.ndarray) -> float:
