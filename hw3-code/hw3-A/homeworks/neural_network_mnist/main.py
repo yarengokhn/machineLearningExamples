@@ -26,7 +26,15 @@ class F1(Module):
             k (int): Output dimension/number of classes.
         """
         super().__init__()
-        raise NotImplementedError("Your Code Goes Here")
+        self.w0 = Parameter(torch.empty(h, d))
+        self.b0 = Parameter(torch.empty(h))
+        self.w1 = Parameter(torch.empty(k, h))
+        self.b1 = Parameter(torch.empty(k))
+        a = 1 / math.sqrt(d)
+        self.w0.data = Uniform(-a, a)
+        self.b0.data = Uniform(-a, a)
+        self.w1.data = Uniform(-a, a)
+        self.b1.data = Uniform(-a, a)
 
     @problem.tag("hw3-A")
     def forward(self, x: torch.Tensor) -> torch.Tensor:
