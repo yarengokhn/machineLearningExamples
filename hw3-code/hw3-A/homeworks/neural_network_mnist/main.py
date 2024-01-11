@@ -11,7 +11,6 @@ from torch.nn.functional import cross_entropy, relu
 from torch.nn.parameter import Parameter
 from torch.optim import Adam
 from torch.utils.data import DataLoader, TensorDataset
-
 from utils import load_dataset, problem
 
 
@@ -50,8 +49,9 @@ class F1(Module):
         Returns:
             torch.Tensor: LongTensor of shape (n, k). Prediction.
         """
-        raise NotImplementedError("Your Code Goes Here")
 
+        f1_output = self.w1*(relu(self.w0 @ x + self.b0)) + self.b1
+        return f1_output
 
 class F2(Module):
     @problem.tag("hw3-A", start_line=1)
@@ -65,7 +65,21 @@ class F2(Module):
             k (int): Output dimension/number of classes.
         """
         super().__init__()
-        raise NotImplementedError("Your Code Goes Here")
+        self.w0 = Parameter(torch.empty(h0, d))
+        self.b0 = Parameter(torch.empty(h0))
+        self.w1 = Parameter(torch.empty(h1, h0))
+        self.b1 = Parameter(torch.empty(h1))
+        self.w2 = Parameter(torch.empty(k, h1))
+        self.b2 = Parameter(torch.empty(k))
+
+
+        a = 1 / math.sqrt(d)
+        self.w0.data = Uniform(-a, a)
+        self.b0.data = Uniform(-a, a)
+        self.w1.data = Uniform(-a, a)
+        self.b1.data = Uniform(-a, a)
+        self.w2.data = Uniform(-a, a)
+        self.b2.data = Uniform(-a, a)
 
     @problem.tag("hw3-A")
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -81,7 +95,8 @@ class F2(Module):
         Returns:
             torch.Tensor: LongTensor of shape (n, k). Prediction.
         """
-        raise NotImplementedError("Your Code Goes Here")
+        f2_output = self.w2*(relu(self.w1*(relu(self.w0 @ x + self.b0)) + self.b1))+self.b2
+        return f2_output
 
 
 @problem.tag("hw3-A")

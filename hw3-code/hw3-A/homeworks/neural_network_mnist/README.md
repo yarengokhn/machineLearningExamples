@@ -1,4 +1,4 @@
-## Neural Networks for MNIST
+l## Neural Networks for MNIST
 In this problem you will build 2 models and train them on MNIST dataset.
 Start by having a look at [main.py](./main.py) file.
 You will see that there are two classes (`F1` and `F2`) as well as two functions (`train` and `main`) that you have to implement.
