@@ -50,9 +50,9 @@ class F1(Module):
         Returns:
             torch.Tensor: LongTensor of shape (n, k). Prediction.
         """
-
-        f1_output = self.w1*(relu(self.w0 @ x.t() + self.b0)) + self.b1
-        return f1_output.t()
+        output1 = relu(self.w0 @ x.t() + self.b0) # shape (h, n)
+        output2 = relu(self.w1 * output1 + self.b1) # shape (k, n)
+        return output2.t() # shape (n, k)
 
 class F2(Module):
     @problem.tag("hw3-A", start_line=1)
@@ -73,7 +73,6 @@ class F2(Module):
         self.b1 = Parameter(torch.empty(h1))
         self.w2 = Parameter(torch.empty(k, h1))
         self.b2 = Parameter(torch.empty(k))
-
         a = 1 / math.sqrt(d)
         self.w0.data = Uniform(-1*a, a)
         self.b0.data = Uniform(-1*a, a)
@@ -96,8 +95,10 @@ class F2(Module):
         Returns:
             torch.Tensor: LongTensor of shape (n, k). Prediction.
         """
-        f2_output = self.w2*(relu(self.w1*(relu(self.w0 @ x.t() + self.b0)) + self.b1))+self.b2
-        return f2_output.t()
+        output1 = relu(self.w0 @ x.t() + self.b0) # shape (h0, n)
+        output2 = relu(self.w1 @ output1 + self.b1) # shape (h1, n)
+        output3 = relu(self.w2 @ output2 + self.b2) # shape (k, n)
+        return output3.t() # shape (n, k)
 
 
 @problem.tag("hw3-A")
